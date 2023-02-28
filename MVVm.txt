@@ -1,0 +1,147 @@
+==========================MVVM==========================
+it's a design pattern and that's is used in large app to keep app clean code, rebustness , and other advantages.
+
+consist of :
+1)view    // front end file 
+2)modal   // this is data presentation modal
+3)view modal     // business logic 
+
+-------------------------------------------------------
+
+Demo:
+
+random images load in stagger layout 
+-----------
+
+solution :
+picsum
+
+1)lib/model/picsum_modal.dart//
+make a model 
+
+2)create network service to featch data from api's
+
+pubspec.yaml//
+add :
+	http
+	transparent_images
+	flutter stagger_grid_view
+
+lib/servies//
+service.dart
+
+import http
+
+class Service{
+
+Future<List<PicSumModel>> fetchPicSumAPI() async {
+String url = "http://picsum.photos/v2/list";
+final response=await http.get(Uri.parse(url));
+if(response.statusCode==200){
+final json = JsonDecode(response.body) as List<dynamic>;
+final listResult=Json.map(e)=>PicSumModel.fromJson(e)).toList();
+return listResult;
+
+
+
+
+
+
+}else{
+
+
+throw Exception("Error fetching data"); 
+}
+}
+----------------------------------
+3)  create view_model
+
+list_pics_viewmodel.dart//
+
+
+class ListPictureViewModel{
+
+
+List <PictureViewModel>? pictures;
+
+Future<void> fetchPictures() asyncs{
+
+
+final apiResult = await Service().fetchPicturesApi();
+this.pictures = apiResult .map(e)=>PictureViewModel(e)).toList();
+
+}
+
+
+
+}
+
+
+
+class PictureViewModel {
+
+final PicSumModel? 	picSumModel;
+
+PictureViewModel(this.picSumModel);
+
+
+}
+
+
+-----------------------------
+4) make view//home.dart//
+
+ ListPictureViewModel listPictureViewModel =new ListPictureViewModel();
+
+
+
+body:FutureBuilder(
+
+future:listPictureViewModel.fetchPictures(),
+builder:(context,snapshot){
+if(snapshot.connectionState==ConnectionState.waiting){
+
+returen Center(child:CircularProgressIndicator(),);
+
+
+}else{
+
+return StaggeredGridView.countBuilder(
+crossAxisCount :2,
+
+
+
+
+itemBuilder:(Buildertext :context,int index)=>Container(
+
+color:Colors.gray,
+child:FadeInImage.memoryNetwork(placeholder:kTransparentImage,image:'${listPictureViewModel.picture![index]!.picSumModel!.downloadUrl}',
+
+fit:BoxFit.cover
+
+)
+
+
+),
+
+
+
+
+staggerdTileBuilder:(index)=>
+StaggeredTile.count(2,index.isEven?2:1),mainAxisSpacing:4.0,
+crossAxisSpacing:6.0);
+
+
+
+}
+
+},
+
+
+
+) 
+
+
+
+
+
